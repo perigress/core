@@ -15,11 +15,13 @@ const replaceId = (ob, list)=>{
 };
 
 const removeId = (ob, list)=>{
-    list.reverse().forEach((item, iindex)=>{
-        const index = list.length - iindex -1;
+    const length = list.length;
+    list.concat([]).reverse().forEach((item, iindex)=>{
+        const index = length - iindex - 1;
         if(item.id === ob.id){
             list.splice(index, 1);
         }
+        
     });
 };
 export class MemorySource extends Source{

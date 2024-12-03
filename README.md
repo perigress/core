@@ -2,11 +2,19 @@
 ===============
 A medium for contract based development.
 
-Data maintenance, contract testing and data generation without boilerplate using a series of either [joi validators](https://joi.dev/api/)(.spec.joi.js), [JSON Schema](https://json-schema.org/)(.spec.schema.js), or example [JSON](https://json.org/example.html)(.spec.json) files to represent the structure of the API URLs(which you are probably **already** writing).
+Data maintenance, contract testing and data generation without boilerplate using a series of validators ([JSON Schema](https://json-schema.org/)(.spec.schema.js) by default) to represent the structure of the API URLs(which you are probably **already** writing).
 
 The ultimate goal of this library is to generate fully functional and tested backends, mocks, seeds and migrations from nothing more than a set of schema.
 
 uses standard json-schema but with the addition of the `private` and `protected` fields on the root object (corresponding to *no* client access and *only* expanded access) and `link` on the member fields to point linkages to the correct object.
+
+Background
+----------
+This library was originally designed as a fake data conduit which would be replaced with direct data access once you started hooking up an actual database. This worked really well, but the first major use of the library was with an org that had fuzzy requirements and both wouldn't give direct access to the DBs (as was originally agreed upon) *and* had a new team on the backend that was unfamiliar with the code and the data structures... to make things even more fun there were a variety of vestigial fields which had been replaced or repurposed. 
+
+The result was requirements coming in piecemeal and frequent restructuring of the data structure which accelerated throughout the project and well past the delivery deadline. Reworking this test stub API to be a dynamic delivery API configured by validators allowed us to stay 2-3 weeks behind the requirements in the face of a situation which would otherwise be ruinous. This success led me to reevaluate and reapproach the design with this as a core functionality rather than as bolted on emergency triage, adding to versatility and efficiency as well as migrating away from legacy formats to concentrate on json-schema (which almost all validators can be converted to).
+
+Now it's more modular, with less inactive code paths and is designed to be a configuration driven API from the start. The core is also executable in the browser laying the path for cascading data sources or distributed browser data.
 
 Usage
 -----

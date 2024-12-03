@@ -10,5 +10,9 @@ class Transit {
       resolve();
     });
   }
+  handleRequest(name, handler) {
+    //meta, data, respond
+    throw new Error('.handleRequest must be implemented on source');
+  }
 }
 exports.Transit = Transit;

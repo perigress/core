@@ -22,8 +22,10 @@ const ensureRequire = ()=> (!internalRequire) && (internalRequire = mod.createRe
 class Format {
   constructor() {
     this.loaded = new Promise(resolve => {
-      resolve;
+      resolve();
     });
   }
+  toJsonSchema(definition) {}
+  formatReturn(type, result) {}
 }
 exports.Format = Format;

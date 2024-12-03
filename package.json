@@ -104,6 +104,7 @@
     "dependencies": {
         "@environment-safe/file": "^0.3.2",
         "@environment-safe/json-schema": "^0.0.1",
-        "browser-or-node": "^2.1.1"
+        "browser-or-node": "^2.1.1",
+        "cors": "^2.8.5"
     }
 }

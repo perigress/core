@@ -34,4 +34,9 @@ export class Source{
         throw new Error('.delete must be implemented on source');
     }
     
+    //return a complex batch according to criteria
+    search(type, typeDefinition, criteria){
+        
+    }
+    
 }

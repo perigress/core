@@ -15,6 +15,14 @@ const ensureRequire = ()=> (!internalRequire) && (internalRequire = mod.createRe
 // A format is the wire transfer for the API 
 export class Format{
     constructor(){
-        this.loaded = new Promise((resolve)=>{ resolve; });
-    } 
+        this.loaded = new Promise((resolve)=>{ resolve(); });
+    }
+    
+    toJsonSchema(definition){
+        
+    }
+    
+    formatReturn(type, result){
+        
+    }
 }

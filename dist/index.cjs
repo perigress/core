@@ -55,10 +55,16 @@ const ensureRequire = ()=> (!internalRequire) && (internalRequire = mod.createRe
 //TODO: 'document mode' where it auto-joins all levels
 class API {
   constructor(options) {
+    this.options = options;
     this.locations = options.locations;
     this.data = options.data || [];
     this.format = options.format;
     this.transit = options.transit;
+    if (this.transit) {
+      if (this.format) {
+        this.transit.setFormat(this.format);
+      }
+    }
     this.source = options.source;
     let definitions = [];
     const data = this.data.map(DataClass => {
@@ -73,7 +79,13 @@ class API {
     //eslint-disable-next-line no-async-promise-executor
     this.loaded = new Promise(async (resolve, reject) => {
       try {
-        await Promise.all([this.format.loaded, this.transit.loaded, this.source.loaded, ...data]);
+        let loadables = [];
+        if (this.format) loadables.push(this.format.loaded);
+        if (this.transit) loadables.push(this.transit.loaded);
+        if (this.source) loadables.push(this.source.loaded);
+        if (this.transitLoaded) loadables.push(this.transitLoaded);
+        loadables = [...loadables, ...data];
+        await Promise.all(loadables);
         let schemas = [];
         for (let lcv = 0; lcv < definitions.length; lcv++) {
           const schema = definitions[lcv].files.map(file => {
@@ -81,12 +93,25 @@ class API {
           });
           schemas = schemas.concat(schema);
         }
+        for (let lcv = 0; lcv < schemas.length; lcv++) {
+          schemas[lcv];
+        }
         this.schemas = schemas;
+        if (this.transit) await this.transit.registerEndpoints(this);
         resolve();
       } catch (ex) {
         reject(ex);
       }
     });
+  }
+  primaryKey() {
+    return this.options.id;
+  }
+  async start(opts) {
+    return await this.transit.open(opts);
+  }
+  async stop(opts) {
+    return await this.transit.close(opts);
   }
   getType(name) {
     return this.schemas.reduce((agg, schema) => {
