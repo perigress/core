@@ -15,6 +15,9 @@
     "fullName": {
       "type": "string"
     },
+    "password": {
+      "type": "string"
+    },
     "birthdate": {
       "type": "integer"
     },

@@ -37,8 +37,19 @@ class HttpTransit extends _transit.Transit {
   close() {
     return this.server.close();
   }
-  setFormat(format) {
-    this.format = format;
+  get(path, handler) {
+    if (this.auth) {
+      this.app.get(`${path}`, this.auth.httpAuthenticate(), handler);
+    } else {
+      this.app.get(`${path}`, handler);
+    }
+  }
+  post(path, handler) {
+    if (this.auth) {
+      this.app.post(`${path}`, this.auth.httpAuthenticate(), handler);
+    } else {
+      this.app.post(`${path}`, handler);
+    }
   }
   async registerEndpoints(api) {
     const schemas = api.schemas;
@@ -138,31 +149,62 @@ class HttpTransit extends _transit.Transit {
         if (httpVerbs.indexOf(verbs[lcv]) === -1) {
           throw new Error(`Unrecognized HTTP verb:${verbs[lcv]}`);
         }
-        this.app[verbs[lcv]](`/${path}`, async (req, res) => {
+        const handleFn = async (req, res) => {
           const meta = {};
           meta.name = name;
           meta.path = path;
           meta.params = req.params;
           const body = req.body;
+          if (this.debugAuth) {
+            try {
+              this.auth.passport.authenticate('jwt', (error, user, info) => {
+                req.user = user;
+                console.log(error);
+                console.log(user);
+                console.log(info);
+              })(req, res);
+            } catch (ex) {
+              console.log('ERROR', ex);
+            }
+          }
           const requestBody = this.format.decode(body);
           await handler[verbs[lcv]](meta, requestBody, (responseData, responseMeta = {}) => {
             const result = this.format.encode(responseData);
             res.send(result);
           });
-        });
+        };
+        if (this.auth && !this.auth.debugAuth) {
+          this.app[verbs[lcv]](`/${path}`, this.auth.httpAuthenticate(), handleFn);
+        } else {
+          this.app[verbs[lcv]](`/${path}`, handleFn);
+        }
       }
     } else {
-      this.app.get(`/${path}`, async (req, res) => {
-        const meta = {};
-        meta.name = name;
-        meta.path = path;
-        meta.params = req.params;
-        const body = req.body;
-        handler(meta, body, (responseData, responseMeta = {}) => {
-          const result = this.format.encode(responseData);
-          res.send(result);
+      if (this.auth) {
+        this.app.get(`/${path}`, this.auth.httpAuthenticate(), async (req, res) => {
+          const meta = {};
+          meta.name = name;
+          meta.path = path;
+          meta.params = req.params;
+          const body = req.body;
+          handler(meta, body, (responseData, responseMeta = {}) => {
+            const result = this.format.encode(responseData);
+            res.send(result);
+          });
         });
-      });
+      } else {
+        this.app.get(`/${path}`, async (req, res) => {
+          const meta = {};
+          meta.name = name;
+          meta.path = path;
+          meta.params = req.params;
+          const body = req.body;
+          handler(meta, body, (responseData, responseMeta = {}) => {
+            const result = this.format.encode(responseData);
+            res.send(result);
+          });
+        });
+      }
     }
   }
 }

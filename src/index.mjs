@@ -32,12 +32,17 @@ class API{
         this.data = options.data || [];
         this.format = options.format;
         this.transit = options.transit;
+        this.source = options.source;
         if(this.transit){
             if(this.format){
                 this.transit.setFormat(this.format);
             }
+            if(options.auth){
+                this.auth = options.auth;
+                this.auth.attachAPI(this);
+            }
+            this.transit.setAuth(this.auth);
         }
-        this.source = options.source;
         
         let definitions = [];
         const data = this.data.map((DataClass)=>{
@@ -70,12 +75,29 @@ class API{
                     schemas[lcv];
                 }
                 this.schemas = schemas;
-                if(this.transit) await this.transit.registerEndpoints(this);
+                if(this.transit){
+                    this.transit.app.use(function(req, res, next){
+                        next();
+                    });
+                    await this.transit.registerEndpoints(this);
+                    if(this.auth){
+                        this.transit.setAuth(this.auth);
+                        this.auth.registerEndpoints(this);
+                    }
+                }
                 resolve();
             }catch(ex){
                 reject(ex);
             }
         }));
+    }
+    
+    endpoints(){
+        return this.transit.app._router.stack.map((item)=>{ return (
+            item.route && item.route.path
+        ) || null; }).filter((item)=>{
+            return item !== null;
+        });
     }
     
     primaryKey(){

@@ -44,31 +44,49 @@ peri new foo
 
 Then use in your project like:
 ```js
-import { Perigress, Source } from '@perigress/core';
-import { Source } from '@perigress/postgres'; // generate, postgres, sqlite, hypercore
-import { Format } from '@perigress/json-http'; // json-http, soap-http, socket, CBOR
-import { Data as Joi } from '@perigress/joi'; //joi, yup, ts, thrift, protobuf
+import { 
+    Perigress, 
+    JSendFormat, 
+    MemorySource, 
+    JsonSchemaData, 
+    HttpTransit
+} from '@perigress/core';
+import { HttpLocalAuth } from '@perigress/core/http-local-auth';
 
 
 const apiService = new Perigress.API({
-        directories: [],
-        //files: [],
-        data: [ new Joi() ],
-        sources : [ 
-            new Source({
-                name: '',
-                host: '',
-                user: '',
-                password: '',
-                port: ''
-            })
-        ],
-        outputs : [
-            new Format({
-                name : 'fooOut',
-                port: 11111
-            })
-        ]
+    auth: new HttpLocalAuth({
+        id : ['user.handle', 'user.email'],
+        password : ['user.password'],
+        issuer: 'server.domain.tld',
+        audience: 'domain.tld',
+        secret: 'a-test-secret'
+        //hash : ()=>{}
+    }),
+    id:{ //make default (uses uuids)
+        field: 'id',
+        postfix: '_id',
+        type: 'string'
+    },
+    audit: {
+        definition: './data/audit.schema.json',
+        set: (object)=>{
+            //if(!object.createdBy_id) object.createdBy_id = api.currentUser();
+            //object.modifiedBy_id = api.currentUser();
+            //if(!object.modifiedBy_id) object.modifiedBy_id = api.currentUser();
+            //if(!)
+        }
+    },
+    //locations : [ './data/schema' ],
+    schema: [
+        './data/schema/apikey.schema.json',
+        './data/schema/message.schema.json',
+        './data/schema/user.schema.json'
+    ],
+    data: [ JsonSchemaData ],
+    format: new JSendFormat(),
+    transit: new HttpTransit(),
+    source: new MemorySource()
 });
 
 ```
