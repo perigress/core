@@ -26,5 +26,10 @@ class Data {
       resolve();
     });
   }
+  async loadFile(filename) {
+    const file = new File(filename);
+    await file.loaded;
+    return file;
+  }
 }
 exports.Data = Data;

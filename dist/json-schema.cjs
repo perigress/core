@@ -14,6 +14,18 @@ class JsonSchemaData extends _data.Data {
     super();
     this.loaded = this.preload(options);
   }
+
+  //TODO: type detection for mixed types
+
+  async loadFile(filename) {
+    const file = new _file.File(filename);
+    const thisPath = new _file.Path(filename);
+    const nativeMeta = thisPath.parsed.posix || thisPath.parsed.windows;
+    const fileName = nativeMeta.name.split('.').shift();
+    file.name = fileName;
+    await file.loaded;
+    return file;
+  }
   async preload(options) {
     if (options.directories) {
       const dirs = options.directories;

@@ -18,4 +18,10 @@ export class Data{
     constructor(){
         this.loaded = new Promise((resolve)=>{ resolve(); });
     }
+    
+    async loadFile(filename){
+        const file = new File(filename);
+        await file.loaded;
+        return file;
+    }
 }

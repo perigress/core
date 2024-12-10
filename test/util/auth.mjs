@@ -26,15 +26,6 @@ export const authServerConfig = ()=>{
             postfix: '_id',
             type: 'string'
         },
-        audit: {
-            definition: './data/audit.schema.json',
-            set: (object)=>{
-                //if(!object.createdBy_id) object.createdBy_id = api.currentUser();
-                //object.modifiedBy_id = api.currentUser();
-                //if(!object.modifiedBy_id) object.modifiedBy_id = api.currentUser();
-                //if(!)
-            }
-        },
         //locations : [ './data/schema' ],
         schema: [
             './data/schema/apikey.schema.json',

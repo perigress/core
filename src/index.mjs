@@ -31,6 +31,7 @@ class API{
         this.locations = options.locations;
         this.data = options.data || [];
         this.format = options.format;
+        this.audit = options.audit;
         this.transit = options.transit;
         this.source = options.source;
         if(this.transit){
@@ -53,11 +54,22 @@ class API{
             definitions.push(datum);
             return datum.loaded;
         });
+        this.dataObjects = data;
+        
+        const getFile = async (filename)=>{
+            await definitions[0].loaded;
+            return definitions[0].loadFile(filename);
+        };
         
         //eslint-disable-next-line no-async-promise-executor
         this.loaded = (new Promise(async (resolve, reject)=>{
             try{
                 let loadables = [];
+                if(this.audit){
+                    const file = await getFile(this.audit.definition);
+                    await file.loaded;
+                    //console.log(this.audit.definition, file.body().cast('string'));
+                }
                 if(this.format) loadables.push(this.format.loaded);
                 if(this.transit) loadables.push(this.transit.loaded);
                 if(this.source) loadables.push(this.source.loaded);

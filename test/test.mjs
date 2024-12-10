@@ -13,13 +13,18 @@ import {
 //*/
 const should = chai.should();
 
-const postRequest = (request)=>{
+const postRequest = (request, headers={})=>{
+    const postHeaders = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+    };
+    const keys = Object.keys(headers);
+    for(let lcv=0; lcv < keys.length; lcv++){
+        postHeaders[keys[lcv]] = headers[keys[lcv]];
+    }
     return {
         method: 'post',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
+        headers: postHeaders,
         body: (
             typeof request !== 'string'?
                 JSON.stringify(request):
@@ -317,8 +322,16 @@ describe('@perigress/core', ()=>{
                 }
             });
             
-            it.skip('saves an authed new object then retreives it', async ()=>{
+            it('saves an authed new object then retreives it', async ()=>{
                 try{
+                    const auth = await (await fetch(
+                        `http://localhost:${config.port}/login`, postRequest({
+                            data: {
+                                handle: 'alibaba',
+                                password: 'opensesame'
+                            }
+                        })
+                    )).json();
                     const fullName = 'Edward Beggler';
                     const birthdate = Date.now();
                     const email = 'ed@beggler.net';
@@ -333,7 +346,7 @@ describe('@perigress/core', ()=>{
                                     handle
                                 }
                             }
-                        })
+                        }, { Authorization: auth.token })
                     )).json();
                     should.exist(result);
                     should.exist(result.status);
@@ -343,7 +356,7 @@ describe('@perigress/core', ()=>{
                     should.exist(result.data.user.id);
                     const subsequentResult = await (await fetch(
                         `http://localhost:${config.port}/data/user/${result.data.user.id}`, 
-                        postRequest({ data: {} })
+                        postRequest({ data: {} }, { Authorization: auth.token })
                     )).json();
                     should.exist(subsequentResult);
                     should.exist(subsequentResult.status);
@@ -363,8 +376,16 @@ describe('@perigress/core', ()=>{
                 }
             });
             
-            it.skip('saves an authed new object then edits, then retreives it', async ()=>{
+            it('saves an authed new object then edits, then retreives it', async ()=>{
                 try{
+                    const auth = await (await fetch(
+                        `http://localhost:${config.port}/login`, postRequest({
+                            data: {
+                                handle: 'alibaba',
+                                password: 'opensesame'
+                            }
+                        })
+                    )).json();
                     const fullName = 'Adam Morningstar';
                     const birthdate = Date.now();
                     const email = 'monster@frankenstein.org';
@@ -380,7 +401,7 @@ describe('@perigress/core', ()=>{
                                     handle
                                 }
                             }
-                        })
+                        }, { Authorization: auth.token })
                     )).json();
                     should.exist(result);
                     should.exist(result.status);
@@ -394,7 +415,7 @@ describe('@perigress/core', ()=>{
                             data: {
                                 user: result.data.user
                             }
-                        })
+                        }, { Authorization: auth.token })
                     )).json();
                     should.exist(editResult);
                     should.exist(editResult.status);
@@ -404,7 +425,7 @@ describe('@perigress/core', ()=>{
                     should.exist(editResult.data.user.id);
                     const subsequentResult = await (await fetch(
                         `http://localhost:${config.port}/data/user/${result.data.user.id}`, 
-                        postRequest({ data: {} })
+                        postRequest({ data: {} }, { Authorization: auth.token })
                     )).json();
                     should.exist(subsequentResult);
                     should.exist(subsequentResult.status);
@@ -423,8 +444,16 @@ describe('@perigress/core', ()=>{
                 }
             });
             
-            it.skip('saves an authed new object then deletes, then fail to retreive', async ()=>{
+            it('saves an authed new object then deletes, then fail to retreive', async ()=>{
                 try{
+                    const auth = await (await fetch(
+                        `http://localhost:${config.port}/login`, postRequest({
+                            data: {
+                                handle: 'alibaba',
+                                password: 'opensesame'
+                            }
+                        })
+                    )).json();
                     const fullName = 'Marvin Mxyztplk';
                     const birthdate = Date.now();
                     const email = 'mr@mxyztplk.org';
@@ -439,7 +468,7 @@ describe('@perigress/core', ()=>{
                                     handle
                                 }
                             }
-                        })
+                        }, { Authorization: auth.token })
                     )).json();
                     should.exist(result);
                     should.exist(result.status);
@@ -452,14 +481,14 @@ describe('@perigress/core', ()=>{
                             data: {
                                 user: result.data.user
                             }
-                        })
+                        }, { Authorization: auth.token })
                     )).json();
                     should.exist(deleteResult);
                     should.exist(deleteResult.status);
                     deleteResult.status.should.equal('success');
                     const subsequentResult = await (await fetch(
                         `http://localhost:${config.port}/data/user/${result.data.user.id}`, 
-                        postRequest({ data: {} })
+                        postRequest({ data: {} }, { Authorization: auth.token })
                     )).json();
                     should.exist(subsequentResult);
                     should.exist(subsequentResult.status);

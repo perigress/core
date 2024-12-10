@@ -5,30 +5,22 @@ import {
     JsonSchemaData, 
     HttpTransit
 } from '../../src/index.mjs';
-export const simpleLocalhostConfig =()=>{
+import { HttpLocalAuth } from '../../src/http-local-auth.mjs';
+export const authServerConfig = ()=>{
     let api;
+    const auth = new HttpLocalAuth({
+        id : ['user.handle', 'user.email'],
+        password : ['user.password'],
+        issuer: 'server.domain.tld',
+        audience: 'domain.tld',
+        secret: 'a-test-secret'
+        //hash : ()=>{}
+    });
+    const transit = new HttpTransit();
+    //auth.debugAuth = true;
+    //transit.debugAuth = true;
     const config = {
-        id:{ //make default (uses uuids)
-            field: 'id',
-            postfix: '_id',
-            type: 'string'
-        },
-        //locations : [ './data/schema' ],
-        schema: [
-            './data/schema/apikey.schema.json',
-            './data/schema/message.schema.json',
-            './data/schema/user.schema.json'
-        ],
-        data: [ JsonSchemaData ],
-        source: new MemorySource()
-    };
-    api = new Perigress.API(config);
-    return api;
-};
-
-export const simpleServerConfig =()=>{
-    let api;
-    const config = {
+        auth,
         id:{ //make default (uses uuids)
             field: 'id',
             postfix: '_id',
@@ -40,9 +32,9 @@ export const simpleServerConfig =()=>{
                 //if(!object.createdBy_id) object.createdBy_id = api.currentUser();
                 //object.modifiedBy_id = api.currentUser();
                 //if(!object.modifiedBy_id) object.modifiedBy_id = api.currentUser();
+                //if(!)
             }
         },
-        //TODO: Support join whitelist
         //locations : [ './data/schema' ],
         schema: [
             './data/schema/apikey.schema.json',
@@ -51,14 +43,14 @@ export const simpleServerConfig =()=>{
         ],
         data: [ JsonSchemaData ],
         format: new JSendFormat(),
-        transit: new HttpTransit(),
+        transit,
         source: new MemorySource()
     };
     api = new Perigress.API(config);
     return api;
 };
 
-export const simpleObject = (ob={})=>{
+export const authObject = (ob={})=>{
     return {
         handle: ob.handle || 'admin',
         email: ob.email || 'foo@bar.baz',
