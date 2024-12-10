@@ -1,6 +1,10 @@
 // SERVER ONLY MODULE (unless we get a browser based express)
 import { Transit } from './transit.mjs';
 import express from 'express';
+import * as mod from 'module';
+let require = null;
+const ensureRequire = ()=> (!require) && (require = mod.createRequire(import.meta.url));
+let cors = null;
 
 const httpVerbs = [
     'checkout', 'copy', 'delete', 'get', 'head', 'lock', 'merge', 'mkactivity', 'mkcol', 
@@ -10,10 +14,15 @@ const httpVerbs = [
 export class HttpTransit extends Transit{
     constructor(options={}){
         super();
+        if(!cors){
+            ensureRequire();
+            cors = require('cors');
+        }
         if(options.operateByVerb) this.operateByVerb = true;
         else this.operateByEndpoint = true;
         if(options.format) this.setFormat(options.format);
         this.app = new express();
+        this.app.use(cors());
         this.app.use(express.json());
         this.prefix = 'data/';
     }

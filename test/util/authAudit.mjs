@@ -6,7 +6,7 @@ import {
     HttpTransit
 } from '../../src/index.mjs';
 import { HttpLocalAuth } from '../../src/http-local-auth.mjs';
-export const authServerConfig = ()=>{
+export const authAuditServerConfig = ()=>{
     let api;
     const auth = new HttpLocalAuth({
         id : ['user.handle', 'user.email'],

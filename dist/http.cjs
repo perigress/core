@@ -6,16 +6,27 @@ Object.defineProperty(exports, "__esModule", {
 exports.HttpTransit = void 0;
 var _transit = require("./transit.cjs");
 var _express = _interopRequireDefault(require("express"));
+var mod = _interopRequireWildcard(require("module"));
+function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
+function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 // SERVER ONLY MODULE (unless we get a browser based express)
 
+let _require = null;
+const ensureRequire = () => !_require && (_require = mod.createRequire(_require('url').pathToFileURL(__filename).toString()));
+let cors = null;
 const httpVerbs = ['checkout', 'copy', 'delete', 'get', 'head', 'lock', 'merge', 'mkactivity', 'mkcol', 'move', 'm-search', 'notify', 'options', 'patch', 'post', 'purge', 'put', 'report', 'search', 'subscribe', 'trace', 'unlock', 'unsubscribe'];
 class HttpTransit extends _transit.Transit {
   constructor(options = {}) {
     super();
+    if (!cors) {
+      ensureRequire();
+      cors = _require('cors');
+    }
     if (options.operateByVerb) this.operateByVerb = true;else this.operateByEndpoint = true;
     if (options.format) this.setFormat(options.format);
     this.app = new _express.default();
+    this.app.use(cors());
     this.app.use(_express.default.json());
     this.prefix = 'data/';
   }
