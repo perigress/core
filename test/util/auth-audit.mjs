@@ -6,6 +6,9 @@ import {
     HttpTransit
 } from '../../src/index.mjs';
 import { HttpLocalAuth } from '../../src/http-local-auth.mjs';
+import audit from '../data/audit.schema.json' assert { type: 'json' };
+
+
 export const authAuditServerConfig = ()=>{
     let api;
     const auth = new HttpLocalAuth({
@@ -27,15 +30,16 @@ export const authAuditServerConfig = ()=>{
             type: 'string'
         },
         audit: {
-            definition: './data/audit.schema.json',
-            set: (object)=>{
-                //if(!object.createdBy_id) object.createdBy_id = api.currentUser();
-                //object.modifiedBy_id = api.currentUser();
-                //if(!object.modifiedBy_id) object.modifiedBy_id = api.currentUser();
-                //if(!)
+            data: audit,
+            set: (object, context)=>{
+                const user = context.currentUser();
+                const now = Date.now();
+                if(!object.createdBy_id) object.createdBy_id = user.id;
+                if(!object.createdAt) object.createdAt = now;
+                object.modifiedBy_id = user.id;
+                object.modifiedAt = now;
             }
         },
-        //locations : [ './data/schema' ],
         schema: [
             './data/schema/apikey.schema.json',
             './data/schema/message.schema.json',

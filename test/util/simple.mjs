@@ -34,14 +34,6 @@ export const simpleServerConfig =()=>{
             postfix: '_id',
             type: 'string'
         },
-        audit: {
-            definition: './data/audit.schema.json',
-            set: (object)=>{
-                //if(!object.createdBy_id) object.createdBy_id = api.currentUser();
-                //object.modifiedBy_id = api.currentUser();
-                //if(!object.modifiedBy_id) object.modifiedBy_id = api.currentUser();
-            }
-        },
         //TODO: Support join whitelist
         //locations : [ './data/schema' ],
         schema: [

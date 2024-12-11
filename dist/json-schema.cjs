@@ -23,7 +23,7 @@ class JsonSchemaData extends _data.Data {
     const nativeMeta = thisPath.parsed.posix || thisPath.parsed.windows;
     const fileName = nativeMeta.name.split('.').shift();
     file.name = fileName;
-    await file.loaded;
+    await file.load();
     return file;
   }
   async preload(options) {

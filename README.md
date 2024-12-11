@@ -52,32 +52,33 @@ import {
     HttpTransit
 } from '@perigress/core';
 import { HttpLocalAuth } from '@perigress/core/http-local-auth';
-
+import audit from './data/audit.schema.json' assert { type: 'json' };
 
 const apiService = new Perigress.API({
-    auth: new HttpLocalAuth({
+    // local login + jwt token in auth header
+    auth: new HttpLocalAuth({ 
         id : ['user.handle', 'user.email'],
         password : ['user.password'],
         issuer: 'server.domain.tld',
         audience: 'domain.tld',
         secret: 'a-test-secret'
-        //hash : ()=>{}
     }),
-    id:{ //make default (uses uuids)
+    id:{
         field: 'id',
         postfix: '_id',
         type: 'string'
     },
     audit: {
-        definition: './data/audit.schema.json',
-        set: (object)=>{
-            //if(!object.createdBy_id) object.createdBy_id = api.currentUser();
-            //object.modifiedBy_id = api.currentUser();
-            //if(!object.modifiedBy_id) object.modifiedBy_id = api.currentUser();
-            //if(!)
+        data: audit,
+        set: (object, context)=>{
+            const user = context.currentUser();
+            const now = Date.now();
+            if(!object.createdBy_id) object.createdBy_id = user.id;
+            if(!object.createdAt) object.createdAt = now;
+            object.modifiedBy_id = user.id;
+            object.modifiedAt = now;
         }
     },
-    //locations : [ './data/schema' ],
     schema: [
         './data/schema/apikey.schema.json',
         './data/schema/message.schema.json',

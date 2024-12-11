@@ -15,7 +15,7 @@ export class JsonSchemaData extends Data{
         const nativeMeta = thisPath.parsed.posix || thisPath.parsed.windows;
         const fileName = nativeMeta.name.split('.').shift();
         file.name = fileName;
-        await file.loaded;
+        await file.load();
         return file;
     }
     

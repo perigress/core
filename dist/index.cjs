@@ -61,6 +61,7 @@ class API {
     this.format = options.format;
     this.audit = options.audit;
     this.transit = options.transit;
+    if (this.transit) this.transit.api = this;
     this.source = options.source;
     if (this.transit) {
       if (this.format) {
@@ -92,9 +93,24 @@ class API {
       try {
         let loadables = [];
         if (this.audit) {
-          const file = await getFile(this.audit.definition);
-          await file.loaded;
-          //console.log(this.audit.definition, file.body().cast('string'));
+          this.auditData = {};
+          if (this.audit.definition) {
+            //TODO: dynamic load
+            const file = await getFile(this.audit.definition);
+            await file.loaded;
+          }
+          if (this.audit.data) {
+            this.auditData = this.audit.data;
+          }
+          this.auditValues = (ob, req) => {
+            this.audit.set(ob, {
+              currentUser: () => {
+                if (this.auth) {
+                  return req.user;
+                } else return null;
+              }
+            });
+          };
         }
         if (this.format) loadables.push(this.format.loaded);
         if (this.transit) loadables.push(this.transit.loaded);
@@ -109,8 +125,25 @@ class API {
           });
           schemas = schemas.concat(schema);
         }
-        for (let lcv = 0; lcv < schemas.length; lcv++) {
-          schemas[lcv];
+        let auditKeys = null;
+        try {
+          for (let lcv = 0; lcv < schemas.length; lcv++) {
+            //*
+            if (this.auditData && this.auditData.properties) {
+              if (!auditKeys) auditKeys = Object.keys(this.auditData.properties);
+              for (let keyIndex = 0; keyIndex < auditKeys.length; keyIndex++) {
+                //*
+                if (schemas[lcv].properties[auditKeys[keyIndex]]) {
+                  throw new Error(`Audit column collision (${auditKeys[keyIndex]})`);
+                }
+                schemas[lcv].properties[auditKeys[keyIndex]] = this.auditData.properties[auditKeys[keyIndex]];
+                //*/
+              }
+            }
+            //*/
+          }
+        } catch (ex) {
+          console.log(ex);
         }
         this.schemas = schemas;
         if (this.transit) {

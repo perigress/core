@@ -81,10 +81,12 @@ export class HttpTransit extends Transit{
     async registerEndpoints(api){
         const schemas = api.schemas;
         let run = false;
-        const createFn = async (meta, body, respond)=>{
+        const createFn = async (meta, body, respond, options={})=>{
+            const preProcess = options.writeAudit || ((o)=>o);
             const incomingObjectTypes = Object.keys(body);
             //TODO: support plurals
             const actions = incomingObjectTypes.map((key)=>{
+                preProcess(body[key]);
                 return {
                     type: key,
                     key,
@@ -116,7 +118,9 @@ export class HttpTransit extends Transit{
             }
         };
         //const feedFn = (meta, body, respond)=>{ };
-        const updateFn = async (meta, body, respond)=>{
+        const updateFn = async (meta, body, respond, options={})=>{
+            const preProcess = options.writeAudit || ((o)=>o);
+            preProcess(body[meta.name]);
             const result = await api.update(meta.name, body[meta.name]);
             const results = {};
             results[meta.name] = result;
@@ -174,6 +178,11 @@ export class HttpTransit extends Transit{
                     meta.path = path;
                     meta.params = req.params;
                     const body = req.body;
+                    if(this.api.auditValues){
+                        req.writeAudit = (object)=>{
+                            this.api.auditValues(object, req);
+                        };
+                    }
                     if(this.debugAuth){
                         try{
                             this.auth.passport.authenticate('jwt', (error, user, info)=>{
@@ -193,7 +202,8 @@ export class HttpTransit extends Transit{
                         (responseData, responseMeta={})=>{
                             const result = this.format.encode(responseData);
                             res.send(result);
-                        }
+                        },
+                        {writeAudit: req.writeAudit}
                     );
                 };
                 if(this.auth && (!this.auth.debugAuth)){
