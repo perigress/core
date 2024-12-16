@@ -1,6 +1,6 @@
 {
     "name": "@perigress/core",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "type": "module",
     "main": "dist/index.mjs",
     "module": "src/index.mjs",
@@ -9,6 +9,26 @@
         ".": {
             "import": "./src/index.mjs",
             "require": "./dist/index.cjs"
+        },
+        "./http-local-auth": {
+            "import": "./src/http-local-auth.mjs",
+            "require": "./dist/http-local-auth.cjs"
+        },
+        "./jsend": {
+            "import": "./src/jsend.mjs",
+            "require": "./dist/jsend.cjs"
+        },
+        "./memory": {
+            "import": "./src/memory.mjs",
+            "require": "./dist/memory.cjs"
+        },
+        "./http": {
+            "import": "./src/http.mjs",
+            "require": "./dist/http.cjs"
+        },
+        "./json-schema": {
+            "import": "./src/json-schema.mjs",
+            "require": "./dist/json-schema.cjs"
         },
         "./package.json": {
             "import": "./package.json",
